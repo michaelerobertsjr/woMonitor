@@ -8,7 +8,7 @@ var express = require('express')
 // Client keys are setup in config file.
 var RUNKEEPER_CLIENT_ID = config.rk_id;
 var RUNKEEPER_CLIENT_SECRET = config.rk_secret;
-
+var myAccessToken = "";
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -38,7 +38,7 @@ passport.use(new RunKeeperStrategy({
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
     process.nextTick(function () {
-      
+        myAccessToken = "Bearer " + accessToken;
       // To keep the example simple, the user's RunKeeper profile is returned to
       // represent the logged-in user.  In a typical application, you would want
       // to associate the RunKeeper account with a user record in your database,
@@ -50,8 +50,7 @@ passport.use(new RunKeeperStrategy({
 
 
 
-
-var app = express.createServer();
+var app = express();
 
 // configure Express
 app.configure(function() {
@@ -70,45 +69,36 @@ app.configure(function() {
   app.use(express.static(__dirname + '/public'));
 });
 
-//-------------------------
-// TODO: Need to construct the correct options.
-
-var options = {
-  host: 'https://runkeeper.com',
-  path: '/apps/user',
-  header: {
-    'Authorization':''
-  }
-};
-
-//-------------------------
-
-
-
 app.get('/', function(req, res){
-    var httpCallback = function(response) {
-        var str = '';
-        console.log("httpCallback running...");
-
-        response.on('error', function(err){
-            if (err) throw err;
-            console.log(err);
-        });
-
-        //another chunk of data has been recieved, so append it to `str`
-        response.on('data', function (chunk) {
-            str += chunk;
-        });
-
-        //the whole response has been recieved, so we just print it out here
-        response.on('end', function () {
-            res.send(str);
-        });
+    // The header includes the required access token that was provided 
+    // after authentication by runkeeper via passport.
+    var options = {
+        host: 'api.runkeeper.com',
+        path: '/fitnessActivities',
+        headers: {
+            'Authorization' : myAccessToken,
+            'Accept' : '*/*'
+        }
     };
+    
+    // Make another actual request for data.
+    http.get(options, function (response) {
+        var body = '';
+        // Assemble the data in chunks in case it is a lot of data
+        // it will be streamed until we reach the end.
+        response.on('data', function (chunk) {
+            body += chunk;
+        });
+        response.on('end', function () {
+            // log the output to the consolue
+            // TODO: parse and display the response data.
+            console.log(body);
+        });
+    }).on('error', function (e) {
+        console.log("Got error: " + e.message);
+    });
 
-  // TODO: Now we have an access token make a request using it???   
-   http.request(options, httpCallback).end();
-  res.render('index', { user: req.user } );
+    res.render('index', { user: req.user });
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
@@ -118,6 +108,12 @@ app.get('/account', ensureAuthenticated, function(req, res){
 app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
+
+app.get('/test', function (req, res) {
+    //TODO: Test requests/responses
+    res.render('test', { user: req.user });
+});  
+
 
 // GET /auth/runkeeper
 //   Use passport.authenticate() as route middleware to authenticate the
@@ -130,6 +126,7 @@ app.get('/auth/runkeeper',
     // The request will be redirected to RunKeeper for authentication, so this
     // function will not be called.
   });
+
 
 // GET /auth/runkeeper/callback
 //   Use passport.authenticate() as route middleware to authenticate the
