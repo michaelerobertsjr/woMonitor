@@ -93,12 +93,12 @@ app.get('/', function(req, res){
             // log the output to the consolue
             // TODO: parse and display the response data.
             console.log(body);
+            res.render('index', { data: body, user: req.user });
         });
     }).on('error', function (e) {
         console.log("Got error: " + e.message);
     });
 
-    res.render('index', { user: req.user });
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
