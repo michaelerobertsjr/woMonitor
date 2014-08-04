@@ -1,7 +1,13 @@
 <% if (!user) { %>
-	<h2>Welcome! Please log in.</h2>
+	<h2>Welcome! <a href="/login">Click here</a> to login.</h2>
 <% } else { %>
-	<h2>Hello, <%= user.id %>.</h2>
-	<p>Data: <%= data %></p>
+	<h2>Hello, Runkeeper UserID# <%= user.id %>.</h2>
+	<p>The following runs have recently been recorded:</p>
+	<ul>
+	<% var distance = 0; %>
+	<% for(var i=0; i < data.items.length; i++) {%>
+	    <li>Start Time: <%= data.items[i].start_time %> Distance: <% distance = data.items[i].total_distance/1609.34; %><%= distance.toFixed(2) + " Miles."%></li>
+	<% } %>
+	</ul>
 
 <% } %>

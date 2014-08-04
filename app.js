@@ -84,15 +84,25 @@ app.get('/', function(req, res){
     // Make another actual request for data.
     http.get(options, function (response) {
         var body = '';
-        // Assemble the data in chunks in case it is a lot of data
-        // it will be streamed until we reach the end.
+        // Assemble the data as a string in chunks in case it is a 
+        // lot of data it will be streamed until we reach the end.
         response.on('data', function (chunk) {
             body += chunk;
         });
         response.on('end', function () {
             // log the output to the consolue
             // TODO: parse and display the response data.
+            try
+            {
+              //body = body.replace(/^\uFEFF/, '');
+              body = JSON.parse(body);
+            }
+            catch(e)
+            {
+              console.log("Data is not valid JSON.")
+            }
             console.log(body);
+            console.log("TYPE: " + typeof jsonObject );
             res.render('index', { data: body, user: req.user });
         });
     }).on('error', function (e) {
