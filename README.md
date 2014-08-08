@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/michaelerobertsjr/woMonitor.png?label=ready&title=Ready)](https://waffle.io/michaelerobertsjr/woMonitor)
 # woMonitor
 
 [woMonitor](https://github.com/jaredhanson/passport) strategy for authenticating
